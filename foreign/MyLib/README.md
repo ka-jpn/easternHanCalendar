@@ -1,0 +1,2 @@
+blazorアプリeasternHanCalendarのサブプロジェクト
+F#で記述
