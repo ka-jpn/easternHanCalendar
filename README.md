@@ -1,1 +1,2 @@
 # easternHanCalendar
+後漢四分暦とグレゴリオ暦の対応を計算するBlazorアプリです
