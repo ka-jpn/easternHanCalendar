@@ -1,21 +1,5 @@
 ﻿namespace MyLib
 module Util =
-  (*type Random =
-    static member private generator = System.Random ()
-    static member generateInt minValue maxValue = Random.generator.Next (minValue, maxValue)
-  type LongitudeAndLatitude = { degree:int; minute:int; }
-  type NorthLatitude = LongitudeAndLatitude
-  type EastLongitude = LongitudeAndLatitude
-  type EarthCrd = { north:NorthLatitude; east:EastLongitude; }
-  type MapCrd = { x:int; y:int; }
-  type Name = { value:string; }
-  type PersonIdName = Name
-  type CountryIdName = Name
-  type StateIdName = Name
-  type DistrictIdName = Name
-  type PrefectureIdName = Name
-  type PlaceIdName = Name
-  type Place = { mapCrd:MapCrd; placeIdName:PlaceIdName; }*)
   type Era = | InRange of string | OutRange of string
   type WesternCalendarInputInfo = { gregorianYear:int; month:int; day:int; }
   type WesternCalendarInfo = { westernCalendarInputInfo:WesternCalendarInputInfo; totalDayFromCalendarBaseDay:int; }
@@ -35,13 +19,6 @@ module Util =
     totalDayFromWesternCalendarBaseDay:int;
   }
   type OutputTexts = { easternHanCalendarText:string array option; gregorianCalendarText:string array option; gregorianTotalNumberText:string array; }
-  (*let normalizationEarthCrd earthCrd minuteResolution =
-    let normalizationLongitudeAndLatitude crd minuteResolution =
-      let slideDegree degree = (degree + 180) % 360 - 180
-      let (degree, minute) = (crd.degree + crd.minute / minuteResolution, crd.minute % minuteResolution)
-      let (correctionDegree, correctionMinute) = if minute < 0 then (slideDegree (degree - 1), minute + minuteResolution) else (slideDegree degree, minute)
-      { crd with degree = correctionDegree; minute = correctionMinute; }
-    { north = normalizationLongitudeAndLatitude earthCrd.north minuteResolution; east = normalizationLongitudeAndLatitude earthCrd.east minuteResolution; }*)
   type EasternHanCalendar =
     static member val private blockYears = 19
     static member val private blockMonths = 235
@@ -235,4 +212,5 @@ module Util =
         easternHanCalendarText = easternHanCalendarText;
         gregorianCalendarText = gregorianCalendarText;
         gregorianTotalNumberText = [ "グレゴリオ暦経過日数"; string calendarTotalNumber; ] |> List.toArray
+
       }
