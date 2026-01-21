@@ -1,0 +1,114 @@
+html {
+  container-type: inline-size;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  font-size: min(2cqw,20px);
+}
+
+body {
+  background-color: transparent;
+  width: 100%;
+}
+
+button, input {
+  border: 0;
+  box-shadow: black 0 0 0.1em inset;
+}
+
+button {
+  padding: 0.1em;
+  color:#000;
+}
+
+#explainPanel {
+  width: 100cqw;
+  max-height: 90cqh;
+  overflow-x: hidden;
+  background: #DDDE;
+  position: absolute;
+  bottom: 2.6em;
+}
+
+input[type="checkbox"] {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.page {
+  height: 100%;
+}
+
+.digit2 {
+  width: 4em;
+}
+
+.digit4 {
+  width: 7em;
+}
+
+.digit8 {
+  width: 13em;
+}
+
+#app {
+  display: flex;
+  height: 100cqh;
+}
+
+#controlPanel {
+  width: 100cqw;
+  min-height: calc(100cqh - 3.2em);
+}
+
+#inputPanel {
+  border-radius: 1em;
+  background-color: #FEE;
+  padding: 0 0.5em;
+}
+
+#outputPanel {
+  border-radius: 1em;
+  background-color: #EEF;
+  padding: 0 0.5em;
+  flex-grow: 1;
+}
+
+#outputTextArea {
+  border: solid 0.1em black;
+  font-size: 0.85em;
+  flex-grow: 1;
+  height: 0;
+  min-height: 16em;
+}
+
+.outputText{
+  margin: 0 0.2em;
+  white-space: nowrap;
+}
+
+#outputEasternHanText {
+  width: 45.8%;
+}
+
+#outputGregorianText {
+  width: 28%;
+}
+
+#outputGregorianTotalDayText {
+  width: 26.2%;
+}
+
+#explainPanel {
+  font-size: 0.64em;
+  white-space: nowrap;
+}
+
+#explainButton {
+  background: #EEE;
+  width: 100%;
+}
+
+.hide {
+  display: none !important;
+}

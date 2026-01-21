@@ -1,0 +1,252 @@
+﻿@page "/"
+@using Microsoft.FSharp.Core
+@using static MyLib.Util
+<main class="d-flex flex-column">
+  <div class="d-flex flex-column justify-content-between" id="controlPanel">
+    <div class="d-flex flex-column w-100 align-items-center justify-content-center" id="inputPanel">
+      <div>入力</div>
+      <div class="d-flex flex-row justify-content-center align-items-center">
+        <div>後漢四分暦</div>
+        <div class="m-2"></div>
+        <div>起点以来</div>
+        <input class="digit4" type="number" @bind=easternHanYearInputValue />
+        <div>年(0~8160)/閏</div>
+        <input type="checkbox" @bind=isEasternHanLeapManthCheck />
+        <input class="digit2" type="number" @bind=easternHanMonthInputValue />
+        <div>月(1~12)/</div>
+        <input class="digit2" type="number" @bind=easternHanDayInputValue />
+        <div>日(1~30)</div>
+      </div>
+      <div class="d-flex flex-row justify-content-center align-items-center">
+        <div>グレゴリオ暦</div>
+        <div class="m-2"></div>
+        <div>前</div>
+        <input class="checkbox rounded-circle" type="checkbox" @bind=isPrevGregorianCheck />
+        <input class="digit4" type="number" @bind=gregorianYearInputValue />
+        <div>年(前162~前1,1~7999)/</div>
+        <input class="digit2" type="number" @bind=gregorianMonthInputValue />
+        <div>月(1~12)/</div>
+        <input class="digit2" type="number" @bind=gregorianDayInputValue />
+        <div>日(1~31)</div>
+      </div>
+      <div class="d-flex flex-row justify-content-center">
+        <div>グレゴリオ暦1/1/1からの経過日数</div>
+        <div class="m-2"></div>
+        <input class="digit8" type="number" @bind=totalGregorianDayInputValue />
+        <div>(@EasternHanCalendar.startFromWesternCalendarStartDayOffset~@EasternHanCalendar.maxInputWesternCalendarDayNumber)</div>
+      </div>
+      <div class="d-flex flex-row justify-content-center align-items-center">
+        <div>前後期間±</div>
+        <input class="digit2" type="number" @bind=spanInputValue min="0"　/>
+        <div>日(0~9推奨)</div>
+      </div>
+      <div class="d-flex flex-row w-100">
+        <button class="col-4 p-1 m-1 flex-shrink-1" @onclick=startCalcFromEasternHanDay>後漢四分暦から計算</button>
+        <button class="col-4 p-1 m-1 flex-shrink-1" @onclick=startCalcFromGregorianDay>グレゴリオ暦から計算</button>
+        <button class="col-4 p-1 m-1 flex-shrink-1" @onclick=startCalcFromTotalGregorianDay>グレゴリオ暦経過日数から計算</button>
+      </div>
+    </div>
+    <div class="m-1"></div>
+    <div class="d-flex flex-column w-100 align-items-center justify-content-center" id="outputPanel">
+      <div>出力</div>
+      <div class="d-flex flex-column w-100 align-items-center overflow-scroll" id="outputTextArea">
+        @foreach(var dayOutputValue in dayOutputValues) {
+        <div class="d-flex flex-row w-100">
+          <div class="d-flex flex-row" id="outputEasternHanText">
+            @if(fromOption(dayOutputValue.easternHanCalendarText) is not null) {
+              @foreach(var dayOutputValueElem in dayOutputValue.easternHanCalendarText.Value) {
+                <div class="outputText">@dayOutputValueElem</div>
+              }
+            }else{
+              <div class="outputText">(対応する後漢四分暦が定義されていません)</div>
+            }
+          </div>
+          <div class="d-flex flex-row" id="outputGregorianText">
+            @if(fromOption(dayOutputValue.gregorianCalendarText) is not null) {
+              foreach(var dayOutputValueElem in dayOutputValue.gregorianCalendarText.Value) {
+                <div class="outputText">@dayOutputValueElem</div>
+              }
+            }else{
+              <div class="outputText">(グレゴリオ暦計算範囲外です)</div>
+            }
+          </div>
+          <div class="d-flex flex-row" id="outputGregorianTotalDayText">
+            @foreach(var dayOutputValueElem in dayOutputValue.gregorianTotalNumberText) {
+              <div class="outputText">@dayOutputValueElem</div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      <div class="d-flex justify-content-center">@message</div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-center">バージョン1.2.1</div>
+  <div class="position-relative">
+    <button id="explainButton" class="d-flex justify-content-center" @onclick="()=>showExplain=!showExplain">説明</button>
+    <div id="explainPanel" class="d-flex flex-column align-items-center @(showExplain?"":"hide")">
+      <div>
+        <div class="d-flex justify-content-center">説明</div>
+        <div>後漢四分暦は、後漢の章帝の元和2年(グレゴリオ暦換算85年)から蜀の炎興元年(グレゴリオ暦換算263年)まで使用された太陰太陽暦による暦法です</div>
+        <div>19年7閏月の章法を採用し、1太陽年を365+1/4(=365.25)日、1朔望月を29+499/940(≒29.53085)日として設計されています</div>
+        <div>グレゴリオ暦の前162年12月22日、中国の当時の暦で己卯の年の11月1日(甲子)が暦元として設定されています</div>
+        <div>施行日と暦元が大きく違うのは、暦が切り替わるタイミングでの接続の計算を合わせつつ、キリのいい日付まで逆算して元を設定した結果だと思われます</div>
+        <div>蜀では滅亡(263年)までの179年間、魏では青龍4年(236年)までの152年間、呉では黄武元年(222年)までの138年間使用されました</div>
+        <div>このツール上では、グレゴリオ暦日換算で-58815~2921573を有効な入力値として扱います</div>
+        <div>グレゴリオ暦の有効な入力値範囲内であっても、例えば2月30日などの存在しない日付は計算範囲外として弾かれます</div>
+        <div>後漢四分暦の有効な入力値範囲内であっても、閏月がない月に閏を指定した場合は計算範囲外として弾かれます</div>
+        <div>例外的に、後漢四分暦で29日までしかない月の30日の指定は、次の月の1日として解釈されます</div>
+        <div>指定した基準の日付が範囲内であれば、前後期間の結果に範囲外があっても計算自体は問題なく行われます</div>
+        <div>ただし、後漢四分暦やグレゴリオ暦での範囲外はその部分について範囲外との出力結果になります</div>
+        <div>なお、実装にC#/F#を使っている都合上、紀元前を直接扱えないので、内部的に2000年分下駄を履かせています</div>
+        <div>暦元の年を後漢四分暦起点以来0年とし、それを基準に変換・計算・表示を行っています</div>
+        <div>暦の施行日は後漢四分暦起点以来246年1月1日と認識していますが、元和に改元した時点の後漢四分暦起点以来245年8月1日から対応付けています</div>
+        <div>改元データは以下(日付が明示的に分からない場合は分かっている範囲の初日として解釈してあります)</div>
+        <div>後漢四分暦起点以来245年8月1日に元和に改元(グレゴリオ暦84年9月16日、グレゴリオ暦日30574)</div>
+        <div>後漢四分暦起点以来248年7月1日に章和に改元</div>
+        <div>後漢四分暦起点以来250年1月1日に永元に改元</div>
+        <div>後漢四分暦起点以来266年4月1日に元興に改元</div>
+        <div>後漢四分暦起点以来267年1月1日に延平に改元</div>
+        <div>後漢四分暦起点以来268年1月1日に永初に改元</div>
+        <div>後漢四分暦起点以来275年1月1日に元初に改元</div>
+        <div>後漢四分暦起点以来281年4月1日に永寧に改元</div>
+        <div>後漢四分暦起点以来282年7月1日に建光に改元</div>
+        <div>後漢四分暦起点以来283年3月1日に延光に改元</div>
+        <div>後漢四分暦起点以来287年1月1日に永建に改元</div>
+        <div>後漢四分暦起点以来293年3月1日に陽嘉に改元</div>
+        <div>後漢四分暦起点以来297年1月1日に永和に改元</div>
+        <div>後漢四分暦起点以来303年1月1日に漢安に改元</div>
+        <div>後漢四分暦起点以来305年4月1日に建康に改元</div>
+        <div>後漢四分暦起点以来306年1月1日に永憙に改元</div>
+        <div>後漢四分暦起点以来307年1月1日に本初に改元</div>
+        <div>後漢四分暦起点以来308年1月1日に建和に改元</div>
+        <div>後漢四分暦起点以来311年1月1日に和平に改元</div>
+        <div>後漢四分暦起点以来312年1月1日に元嘉に改元</div>
+        <div>後漢四分暦起点以来314年5月1日に永興に改元</div>
+        <div>後漢四分暦起点以来316年1月1日に永寿に改元</div>
+        <div>後漢四分暦起点以来319年6月1日に延熹に改元</div>
+        <div>後漢四分暦起点以来328年6月1日に永康に改元</div>
+        <div>後漢四分暦起点以来329年1月1日に建寧に改元</div>
+        <div>後漢四分暦起点以来333年5月1日に熹平に改元</div>
+        <div>後漢四分暦起点以来339年3月1日に光和に改元</div>
+        <div>後漢四分暦起点以来345年12月1日に中平に改元</div>
+        <div>後漢四分暦起点以来350年4月13日に光熹に改元</div>
+        <div>後漢四分暦起点以来350年8月28日に昭寧に改元</div>
+        <div>後漢四分暦起点以来350年9月1日に永漢に改元</div>
+        <div>後漢四分暦起点以来350年12月1日に中平に改元</div>
+        <div>後漢四分暦起点以来351年1月1日に初平に改元</div>
+        <div>後漢四分暦起点以来355年1月1日に興平に改元</div>
+        <div>後漢四分暦起点以来357年1月1日に建安に改元</div>
+        <div>後漢四分暦起点以来381年3月1日に延康に改元</div>
+        <div>※上記で後漢が終了するので、以下は蜀漢の元号にシフトします</div>
+        <div>後漢四分暦起点以来382年4月1日に章武に改元</div>
+        <div>後漢四分暦起点以来384年5月1日に建興に改元</div>
+        <div>後漢四分暦起点以来399年1月1日に延熙に改元</div>
+        <div>後漢四分暦起点以来419年1月1日に景耀に改元</div>
+        <div>後漢四分暦起点以来424年8月1日に炎興に改元</div>
+        <div>後漢四分暦起点以来424年12月1日に魏の暦にシフト、後漢四分暦終了(グレゴリオ暦264年1月17日、グレゴリオ暦日96074)</div>
+        <div>なので、後漢四分暦の元号と対応付けがされる最初が、後漢の元和元年の最初である後漢四分暦起点以来245年8月1日=グレゴリオ暦84年9月16日=グレゴリオ暦日30574</div>
+        <div>後漢四分暦の元号と対応付けがされる最後が、蜀漢の炎興元年の最後である後漢四分暦起点以来424年11月30日=グレゴリオ暦84年1月16日=グレゴリオ暦日96073です</div>
+        <div>それ以外の有効範囲内は、元号と対応づけはされませんが干支や日付の対応は計算することができます</div>
+      </div>
+      <div id="examplePanel">
+        <div class="d-flex justify-content-center">以下出力の一例</div>
+        <div class="d-flex justify-content-center">※後漢四分暦起点以来0年11月1日、前後期間±1日の指定で、後漢四分暦から計算</div>
+        <div>(対応する後漢四分暦が定義されていません)　グレゴリオ暦前162年12月21日　グレゴリオ暦経過日数-58816</div>
+        <div>起点以来0年(四分暦実施前)己卯11月1日甲子　グレゴリオ暦前162年12月22日　グレゴリオ暦経過日数-58815</div>
+        <div>起点以来0年(四分暦実施前)己卯11月2日乙丑　グレゴリオ暦前162年12月23日　グレゴリオ暦経過日数-58814</div>
+        <div class="d-flex justify-content-center">※後漢四分暦起点以来245年8月1日、前後期間±1日の指定で、後漢四分暦から計算</div>
+        <div>起点以来245年(四分暦実施前)甲申7月29日壬子　グレゴリオ暦84年9月15日　グレゴリオ暦経過日数30573</div>
+        <div>起点以来245年元和1年甲申8月1日癸丑　グレゴリオ暦84年9月16日　グレゴリオ暦経過日数30574</div>
+        <div>起点以来245年元和1年甲申8月2日甲寅　グレゴリオ暦84年9月17日　グレゴリオ暦経過日数30575</div>
+        <div class="d-flex justify-content-center">※後漢四分暦起点以来246年1月1日、前後期間±0日の指定で、後漢四分暦から計算</div>
+        <div>起点以来246年元和2年乙酉1月1日辛巳　グレゴリオ暦85年2月11日　グレゴリオ暦経過日数30722</div>
+        <div class="d-flex justify-content-center">※後漢四分暦起点以来424年12月1日、前後期間±1日の指定で、後漢四分暦から計算</div>
+        <div>起点以来424年炎興1年癸未11月30日壬辰　グレゴリオ暦264年1月16日　グレゴリオ暦経過日数96073</div>
+        <div>起点以来424年(四分暦廃止後)癸未12月1日癸巳　グレゴリオ暦264年1月17日　グレゴリオ暦経過日数96074</div>
+        <div>起点以来424年(四分暦廃止後)癸未12月2日甲午　グレゴリオ暦264年1月18日　グレゴリオ暦経過日数96075</div>
+      </div>
+    </div>
+  </div>
+</main>
+@code {
+  private static bool showExplain = false;
+  private static string easternHanYearInputValue = string.Empty;
+  private static bool isEasternHanLeapManthCheck = false;
+  private static string easternHanMonthInputValue = string.Empty;
+  private static string easternHanDayInputValue = string.Empty;
+  private static bool isPrevGregorianCheck = false;
+  private static string gregorianYearInputValue = string.Empty;
+  private static string gregorianMonthInputValue = string.Empty;
+  private static string gregorianDayInputValue = string.Empty;
+  private static string totalGregorianDayInputValue = string.Empty;
+  private static string spanInputValue = "0";
+  private static List<OutputTexts> dayOutputValues = [];
+  private static string message = "ボタンを押すと計算が始まります";
+  private async Task startCalc(int dayNumber) {
+    int? span = parseInt(spanInputValue);
+    if(dayNumber < EasternHanCalendar.startFromWesternCalendarStartDayOffset || EasternHanCalendar.maxInputWesternCalendarDayNumber < dayNumber) {
+      message = "指定された日付は計算有効範囲外です";
+    }else if(span is null) {
+      message = "前後期間の入力値が正しく解釈できませんでした";
+    } else {
+      await Task.Run(async () => {
+        var rangeList = Enumerable.Range(0, span.Value * 2 + 1);
+        foreach(int count in rangeList) {
+          message=$"{rangeList.Count()}個中{count+1}番目を計算中";
+          await InvokeAsync(StateHasChanged);
+          await Task.Delay(1);
+          dayOutputValues.Add(EasternHanCalendar.showString(dayNumber+count-span.Value));
+        }
+        message = "計算完了しました";
+        await InvokeAsync(StateHasChanged);
+      });
+    }
+  }
+  private void startCalcFromEasternHanDay() {
+    int? year = parseInt(easternHanYearInputValue);
+    int? month = parseInt(easternHanMonthInputValue);
+    int? day = parseInt(easternHanDayInputValue);
+    if(year is not null && month is not null && day is not null) {
+      EasternHanCalendarInputInfo info = new(year.Value, new(isEasternHanLeapManthCheck, month.Value), day.Value);
+      var dayNumber = EasternHanCalendar.maybeGetDayNumberFromEasternHan(info);
+      if(FSharpOption<int>.get_IsSome(dayNumber)) {
+        _ = startCalc(dayNumber.Value);
+      } else {
+        message = "入力値が計算範囲外です";
+      }
+    } else {
+      message = "後漢四分暦の入力値が正しく解釈できませんでした";
+    }
+  }
+  private void startCalcFromGregorianDay() {
+    int? year = parseInt(gregorianYearInputValue);
+    int? month = parseInt(gregorianMonthInputValue);
+    int? day = parseInt(gregorianDayInputValue);
+    if(year is not null && month is not null && day is not null) {
+      WesternCalendarInputInfo info = new(isPrevGregorianCheck ? 1 - year.Value : year.Value, month.Value, day.Value);
+      var dayNumber = EasternHanCalendar.maybeGetDayNumberFromGregorian(info);
+      if(FSharpOption<int>.get_IsSome(dayNumber)) {
+        _ = startCalc(dayNumber.Value);
+      } else {
+        message = "入力値が計算範囲外です";
+      }
+    } else {
+      message = "グレゴリオ暦の入力値が正しく解釈できませんでした";
+    }
+  }
+  private void startCalcFromTotalGregorianDay() {
+    int? dayNumber = parseInt(totalGregorianDayInputValue);
+    if(dayNumber is not null) {
+      _ = startCalc(dayNumber.Value);
+    } else {
+      message = "グレゴリオ暦経過日数の入力値が正しく解釈できませんでした";
+    }
+  }
+  private int? parseInt(string intText) {
+    return int.TryParse(intText,out int result) ? result : null;
+  }
+  private T? fromOption<T>(FSharpOption<T> option) {
+    return FSharpOption<T>.get_IsSome(option) ? option.Value : default(T?);
+  }
+}
